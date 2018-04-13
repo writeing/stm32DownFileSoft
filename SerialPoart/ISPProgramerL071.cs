@@ -74,7 +74,7 @@ namespace Serial_second
 
         private List<BackgroundWorker> _work = null;
 
-        private DataGridView dt;
+        private initListinfo initList;
 
         public enum InitialType
         {
@@ -128,7 +128,7 @@ namespace Serial_second
 
         public ISPProgramerL071() { }
 
-        public void UseISPProgramerL071(ISPProgramerL071 sp, List<BackgroundWorker> work, DataGridView customDataGridView, System.IO.Ports.SerialPort srt1, System.IO.Ports.SerialPort srt2, ComboBox ComNum1, ComboBox property,TextBox SerialText, CheckBox Checkfile1, CheckBox Checkfile2, CheckBox Checkfile3,
+        public void UseISPProgramerL071(ISPProgramerL071 sp, List<BackgroundWorker> work, initListinfo initLists, SerialPort srt1, SerialPort srt2, ComboBox ComNum1, ComboBox property,TextBox SerialText, CheckBox Checkfile1, CheckBox Checkfile2, CheckBox Checkfile3,
             ComboBox Filepath1, ComboBox Filepath2, ComboBox Filepath3)
         {
             _isp = sp;
@@ -142,7 +142,7 @@ namespace Serial_second
             _ComNum_cmb1 = ComNum1; 
             _cbproperty = property; ///烧写串口属性
 
-            dt = customDataGridView;
+            this.initList = initLists;
 
             _TextBox = SerialText;
 
@@ -747,7 +747,7 @@ namespace Serial_second
         {
                 if (port1.IsOpen)
                     port1.Close();
-                _ComNum_cmb1.Text = "打开串口";
+                //_ComNum_cmb1.Text = "打开串口";
          
             var initType = (ISPProgramerL071.InitialType)this._cbproperty.SelectedIndex;
             string portName = this._ComNum_cmb2.SelectedItem as string;
@@ -1301,6 +1301,7 @@ namespace Serial_second
             {
                 byte a;
                 int count = 0;
+                int ackcount = 0;
                 while (true)
                 {
                     if(this.port2.BytesToRead > 0)
@@ -1308,17 +1309,21 @@ namespace Serial_second
                         a = (byte)this.port2.ReadByte();
                         _TextBox.Text += "ReadOutUnProtect: " + " a: 0x" + a.ToString("X2") + "\r\n";
                         if (a == ACK_REPLY)
+                            ackcount ++;
+                        if(ackcount == 2)
+                        {
                             break;
+                        }
                     }
                     count++;
-                    //if(count > 500)
-                    //{
-                    //    return false;
-                    //}
+                    if (count > 2000)
+                    {
+                        return false;
+                    }
                     //_TextBox.Text += count.ToString();
                     Thread.Sleep(1);
                 }
-                Thread.Sleep(2000);
+                Thread.Sleep(3000);
                 return (a == ACK_REPLY);
             }
             catch (Exception)
@@ -1370,26 +1375,26 @@ namespace Serial_second
             }
 
             //写入自定义数据
-            if(dt.Rows.Count>0)
-            for (int i = 0; i < dt.Rows.Count - 1; i++)
+            for (int i = 0; i < initList.select.Count - 1; i++)
             {
-                if (dt.Rows[i].Cells[0].Value.Equals(true))
+                    //if (dt.Rows[i].Cells[0].Value.Equals(true))
+                if (initList.select[i] == true)
                 {
                     UInt32 addr;
-                    if (!UInt32.TryParse(dt.Rows[i].Cells[1].Value.ToString(), System.Globalization.NumberStyles.HexNumber, null, out addr)
+                    if (!UInt32.TryParse(initList.address[i], System.Globalization.NumberStyles.HexNumber, null, out addr)
                         || addr <= ISPProgramer.FLASH_BASE_ADDR || addr % 4 != 0)
                     {
-                        _TextBox.AppendText("自定义数据" + (i + 1) + "行地址" + dt.Rows[i].Cells[1].Value.ToString() + "非法\r\n");
+                        _TextBox.AppendText("自定义数据" + (i + 1) + "行地址" + initList.address[i] + "非法\r\n");
                         return null;
                     }
                     FirmwareInfomation customRow = new FirmwareInfomation();
                     customRow.BaseAddress = addr;
 
-                    if (dt.Rows[i].Cells[2].Value != null && dt.Rows[i].Cells[2].Value.Equals(true)) ///选择HEX格式
+                    if (initList.hex[i].Equals(true)) ///选择HEX格式
                     {
                         try
                         {
-                            customRow.Data = dt.Rows[i].Cells[3].Value.ToString().ToByteArray();
+                            customRow.Data = initList.data[i].ToByteArray();
                         }
                         catch (Exception)
                         {
@@ -1399,10 +1404,10 @@ namespace Serial_second
                     }
                     else
                     {
-                        customRow.Data = Encoding.ASCII.GetBytes(dt.Rows[i].Cells[3].Value.ToString() + "\0");
+                        customRow.Data = Encoding.ASCII.GetBytes(initList.data[i] + "\0");
                     }
-                    if (dt.Rows[i].Cells[4].Value != null)
-                        customRow.Name = dt.Rows[i].Cells[4].Value.ToString();
+                    if (initList.info[i] != null)
+                        customRow.Name = initList.info[i];
                     else
                         customRow.Name = "";
                     firmwares.Add(customRow);
@@ -1442,7 +1447,7 @@ namespace Serial_second
             return result;
         }
 
-        public BackgroundWorker WriteData(List<FirmwareInfomation> list, Action<bool> NextAction)
+        public BackgroundWorker WriteData(List<FirmwareInfomation> list, Action<bool> NextAction,ref bool status)
         {
             BackgroundWorker writeWork = new BackgroundWorker();
             writeWork.WorkerReportsProgress = true;
@@ -1489,12 +1494,13 @@ namespace Serial_second
                                 {
                                 //worker.ReportProgress(0, Convert.ToString(item.BaseAddress, 16) + "写入" + item.Data.Length + "字节并校验成功\r\n");
                                     _TextBox.AppendText(Convert.ToString(item.BaseAddress, 16) + "写入" + item.Data.Length + "字节并校验成功\r\n");
+                                    status = true;
                                 }
                             }
                         }
-                        this._isp.Close();
-                        //e.Result = ret;
-                    }
+                        this._isp.Close();                    
+                    //e.Result = ret;
+                }
                 }
                 //else
                 //{

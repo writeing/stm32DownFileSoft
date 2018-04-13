@@ -23,6 +23,8 @@ namespace SerialPoart
         /// <summary>
         /// 下载文件选择
         /// </summary>
+
+        private List<CheckBox> CheckFileList = new List<CheckBox>();
         private CheckBox _CheckFile1 = null;
         private CheckBox _CheckFile2 = null;
         private CheckBox _CheckFile3 = null;
@@ -30,6 +32,7 @@ namespace SerialPoart
         /// <summary>
         /// 文件路径
         /// </summary>
+        private List<ComboBox> FilePathList = new List<ComboBox>();
         private ComboBox _FilePath1 = null;
         private ComboBox _FilePath2 = null;
         private ComboBox _FilePath3 = null;
@@ -37,6 +40,7 @@ namespace SerialPoart
         /// <summary>
         /// 下载
         /// </summary>
+        private List<Button> _DownLoadList = new List<Button>();
         private Button _DownLoad1 = null;
         private Button _DownLoad2 = null;
         private Button _DownLoad3 = null;
@@ -53,7 +57,10 @@ namespace SerialPoart
         private JsonSave _Path = new JsonSave();
 
         public  bool get_path = false;
+        public programme_serial()
+        {
 
+        }
 
         #region 烧写参数
 
@@ -83,6 +90,18 @@ namespace SerialPoart
             _ShowMessage = SerialText;
 
             _Path = Path;
+
+            CheckFileList.Add(_CheckFile1);
+            CheckFileList.Add(_CheckFile2);
+            CheckFileList.Add(_CheckFile3);
+
+            FilePathList.Add(_FilePath1);
+            FilePathList.Add(_FilePath2);
+            FilePathList.Add(_FilePath3);
+
+            _DownLoadList.Add(_DownLoad1);
+            _DownLoadList.Add(_DownLoad2);
+            _DownLoadList.Add(_DownLoad3);
         }
 
         public void MySerialPoart()
@@ -289,7 +308,25 @@ namespace SerialPoart
                 //File.WriteAllText("info.json", JsonConvert.SerializeObject(_Path));
             }
         }
-
+        public void UseDownLoad(int index) ///
+        {
+            index = index - 1;
+            OpenFileDialog fd = new OpenFileDialog();
+            fd.Filter = "hex文件|*.hex|bin文件|*.bin";
+            if (fd.ShowDialog() == DialogResult.OK)
+            {                
+                if (FilePathList[index].FindString(fd.FileName) < 0)
+                {
+                    FilePathList[index].Items.Add(fd.FileName);
+                }
+                FilePathList[index].SelectedIndex = FilePathList[index].FindString(fd.FileName);
+                //_Path.fpath.Add(fd.FileName);
+                CheckFileList[index].Checked = true;
+                _Path.fpath[2] = fd.FileName;
+                get_path = true;
+                //File.WriteAllText("info.json", JsonConvert.SerializeObject(_Path));
+            }
+        }
         public void UseStartFlash()
         {
             if (!_serial_port.IsOpen)

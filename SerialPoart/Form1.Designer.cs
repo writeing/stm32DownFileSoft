@@ -57,19 +57,20 @@
             this.Reset = new System.Windows.Forms.Button();
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
+            this.initNameCombox = new System.Windows.Forms.ComboBox();
             this.save_initButton = new System.Windows.Forms.Button();
             this.clean_initButton = new System.Windows.Forms.Button();
             this.open_initButton = new System.Windows.Forms.Button();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.newBtn = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -137,7 +138,6 @@
             this.cbcom.Name = "cbcom";
             this.cbcom.Size = new System.Drawing.Size(74, 23);
             this.cbcom.TabIndex = 24;
-            this.cbcom.DropDown += new System.EventHandler(this.cbcom_DropDown);
             // 
             // cfilepath1
             // 
@@ -202,6 +202,7 @@
             this.download2.TabIndex = 33;
             this.download2.Text = "...";
             this.download2.UseVisualStyleBackColor = true;
+            this.download2.Click += new System.EventHandler(this.download2_Click);
             // 
             // download1
             // 
@@ -212,6 +213,7 @@
             this.download1.TabIndex = 34;
             this.download1.Text = "...";
             this.download1.UseVisualStyleBackColor = true;
+            this.download1.Click += new System.EventHandler(this.download1_Click);
             // 
             // download3
             // 
@@ -232,17 +234,20 @@
             // 
             // StartEraseFlash
             // 
+            this.StartEraseFlash.BackColor = System.Drawing.SystemColors.Control;
+            this.StartEraseFlash.Font = new System.Drawing.Font("宋体", 16F);
             this.StartEraseFlash.Location = new System.Drawing.Point(3, 162);
             this.StartEraseFlash.Name = "StartEraseFlash";
             this.StartEraseFlash.Size = new System.Drawing.Size(239, 72);
             this.StartEraseFlash.TabIndex = 38;
             this.StartEraseFlash.Text = "开始烧写";
-            this.StartEraseFlash.UseVisualStyleBackColor = true;
+            this.StartEraseFlash.UseVisualStyleBackColor = false;
             this.StartEraseFlash.Click += new System.EventHandler(this.StartEraseFlash_Click);
             // 
             // SerialFlash
             // 
             this.SerialFlash.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.SerialFlash.Font = new System.Drawing.Font("宋体", 9F);
             this.SerialFlash.Location = new System.Drawing.Point(3, 267);
             this.SerialFlash.Multiline = true;
             this.SerialFlash.Name = "SerialFlash";
@@ -254,55 +259,60 @@
             // 
             // ChipInfor
             // 
+            this.ChipInfor.BackColor = System.Drawing.SystemColors.Control;
+            this.ChipInfor.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.ChipInfor.Location = new System.Drawing.Point(248, 162);
             this.ChipInfor.Name = "ChipInfor";
             this.ChipInfor.Size = new System.Drawing.Size(125, 33);
             this.ChipInfor.TabIndex = 40;
             this.ChipInfor.Text = "芯片信息";
-            this.ChipInfor.UseVisualStyleBackColor = true;
+            this.ChipInfor.UseVisualStyleBackColor = false;
             this.ChipInfor.Click += new System.EventHandler(this.ChipInfor_Click);
             // 
             // WipeFlash
             // 
+            this.WipeFlash.BackColor = System.Drawing.SystemColors.Control;
+            this.WipeFlash.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.WipeFlash.Location = new System.Drawing.Point(248, 199);
             this.WipeFlash.Name = "WipeFlash";
             this.WipeFlash.Size = new System.Drawing.Size(125, 33);
             this.WipeFlash.TabIndex = 42;
             this.WipeFlash.Text = "擦除芯片";
-            this.WipeFlash.UseVisualStyleBackColor = true;
+            this.WipeFlash.UseVisualStyleBackColor = false;
             this.WipeFlash.Click += new System.EventHandler(this.WipeFlash_Click);
             // 
             // ReadFlash
             // 
+            this.ReadFlash.BackColor = System.Drawing.SystemColors.Control;
+            this.ReadFlash.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.ReadFlash.Location = new System.Drawing.Point(383, 162);
             this.ReadFlash.Name = "ReadFlash";
             this.ReadFlash.Size = new System.Drawing.Size(120, 33);
             this.ReadFlash.TabIndex = 43;
             this.ReadFlash.Text = "读取flash";
-            this.ReadFlash.UseVisualStyleBackColor = true;
+            this.ReadFlash.UseVisualStyleBackColor = false;
             this.ReadFlash.Click += new System.EventHandler(this.ReadFlash_Click);
             // 
             // Reset
             // 
+            this.Reset.BackColor = System.Drawing.SystemColors.Control;
+            this.Reset.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Reset.Location = new System.Drawing.Point(383, 199);
             this.Reset.Name = "Reset";
             this.Reset.Size = new System.Drawing.Size(120, 33);
             this.Reset.TabIndex = 44;
             this.Reset.Text = "复位";
-            this.Reset.UseVisualStyleBackColor = true;
+            this.Reset.UseVisualStyleBackColor = false;
             this.Reset.Click += new System.EventHandler(this.Reset_Click);
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.Control;
+            this.panel1.Controls.Add(this.newBtn);
+            this.panel1.Controls.Add(this.initNameCombox);
             this.panel1.Controls.Add(this.save_initButton);
             this.panel1.Controls.Add(this.clean_initButton);
             this.panel1.Controls.Add(this.open_initButton);
-            this.panel1.Controls.Add(this.textBox3);
-            this.panel1.Controls.Add(this.textBox2);
-            this.panel1.Controls.Add(this.textBox1);
-            this.panel1.Controls.Add(this.checkBox3);
-            this.panel1.Controls.Add(this.checkBox2);
             this.panel1.Controls.Add(this.label11);
             this.panel1.Controls.Add(this.label10);
             this.panel1.Controls.Add(this.label9);
@@ -313,11 +323,20 @@
             this.panel1.Size = new System.Drawing.Size(522, 451);
             this.panel1.TabIndex = 59;
             // 
+            // initNameCombox
+            // 
+            this.initNameCombox.FormattingEnabled = true;
+            this.initNameCombox.Location = new System.Drawing.Point(3, 412);
+            this.initNameCombox.Name = "initNameCombox";
+            this.initNameCombox.Size = new System.Drawing.Size(121, 23);
+            this.initNameCombox.TabIndex = 69;
+            this.initNameCombox.SelectedIndexChanged += new System.EventHandler(this.initNameCombox_SelectedIndexChanged);
+            // 
             // save_initButton
             // 
-            this.save_initButton.Location = new System.Drawing.Point(405, 405);
+            this.save_initButton.Location = new System.Drawing.Point(417, 405);
             this.save_initButton.Name = "save_initButton";
-            this.save_initButton.Size = new System.Drawing.Size(100, 34);
+            this.save_initButton.Size = new System.Drawing.Size(88, 34);
             this.save_initButton.TabIndex = 68;
             this.save_initButton.Text = "保存";
             this.save_initButton.UseVisualStyleBackColor = true;
@@ -325,62 +344,23 @@
             // 
             // clean_initButton
             // 
-            this.clean_initButton.Location = new System.Drawing.Point(262, 404);
+            this.clean_initButton.Location = new System.Drawing.Point(326, 405);
             this.clean_initButton.Name = "clean_initButton";
-            this.clean_initButton.Size = new System.Drawing.Size(112, 34);
+            this.clean_initButton.Size = new System.Drawing.Size(85, 34);
             this.clean_initButton.TabIndex = 67;
-            this.clean_initButton.Text = "清空";
+            this.clean_initButton.Text = "删除";
             this.clean_initButton.UseVisualStyleBackColor = true;
             this.clean_initButton.Click += new System.EventHandler(this.clean_initButton_Click);
             // 
             // open_initButton
             // 
-            this.open_initButton.Location = new System.Drawing.Point(139, 403);
+            this.open_initButton.Location = new System.Drawing.Point(140, 405);
             this.open_initButton.Name = "open_initButton";
-            this.open_initButton.Size = new System.Drawing.Size(100, 36);
+            this.open_initButton.Size = new System.Drawing.Size(91, 36);
             this.open_initButton.TabIndex = 66;
             this.open_initButton.Text = "打开";
             this.open_initButton.UseVisualStyleBackColor = true;
             this.open_initButton.Click += new System.EventHandler(this.open_initButton_Click);
-            // 
-            // textBox3
-            // 
-            this.textBox3.Location = new System.Drawing.Point(139, 35);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(100, 25);
-            this.textBox3.TabIndex = 10;
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(254, 35);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(133, 25);
-            this.textBox2.TabIndex = 9;
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(405, 35);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 25);
-            this.textBox1.TabIndex = 8;
-            // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(29, 38);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(18, 17);
-            this.checkBox3.TabIndex = 7;
-            this.checkBox3.UseVisualStyleBackColor = true;
-            // 
-            // checkBox2
-            // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(88, 38);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(18, 17);
-            this.checkBox2.TabIndex = 6;
-            this.checkBox2.UseVisualStyleBackColor = true;
             // 
             // label11
             // 
@@ -403,7 +383,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(436, 8);
+            this.label9.Location = new System.Drawing.Point(436, 17);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(37, 15);
             this.label9.TabIndex = 2;
@@ -427,11 +407,58 @@
             this.label7.TabIndex = 0;
             this.label7.Text = "hex";
             // 
+            // newBtn
+            // 
+            this.newBtn.Location = new System.Drawing.Point(237, 403);
+            this.newBtn.Name = "newBtn";
+            this.newBtn.Size = new System.Drawing.Size(83, 39);
+            this.newBtn.TabIndex = 70;
+            this.newBtn.Text = "新增";
+            this.newBtn.UseVisualStyleBackColor = true;
+            this.newBtn.Click += new System.EventHandler(this.newBtn_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(3, 469);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(500, 25);
+            this.textBox1.TabIndex = 60;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(512, 470);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(81, 24);
+            this.button1.TabIndex = 61;
+            this.button1.Text = "CRC";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(3, 501);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(499, 25);
+            this.textBox2.TabIndex = 62;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(526, 504);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(67, 15);
+            this.label12.TabIndex = 63;
+            this.label12.Text = "校验结果";
+            // 
             // Form1
             // 
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ClientSize = new System.Drawing.Size(1040, 475);
+            this.ClientSize = new System.Drawing.Size(1039, 532);
+            this.Controls.Add(this.label12);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.Reset);
             this.Controls.Add(this.ReadFlash);
@@ -458,6 +485,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button2);
             this.Name = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load_1);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -500,14 +528,15 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Button save_initButton;
         private System.Windows.Forms.Button clean_initButton;
         private System.Windows.Forms.Button open_initButton;
+        private System.Windows.Forms.ComboBox initNameCombox;
+        private System.Windows.Forms.Button newBtn;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label12;
     }
 }
 

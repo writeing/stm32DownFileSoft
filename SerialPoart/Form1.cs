@@ -35,7 +35,14 @@ namespace SerialPoart
         public const int BAUDRATE = 115200;
 
         bool set_path = false;
-        
+
+
+        //********************************************************
+        List<initListinfo> initLists = new List<initListinfo>();
+        string initPath = "init.json";
+        public int initIndex = 0;
+        private initList g_tempInitlist = new initList();
+        //********************************************************
         ///调用类
         public Form1()
         {
@@ -51,8 +58,7 @@ namespace SerialPoart
             sp_programme.ProgrammeSet();
 
             //eraseserialPort.DataReceived += new SerialDataReceivedEventHandler(EraseserialPort_DataReceived); //订阅委托 ; 读取数据会慢不采用该模式
-            isp.UseISPProgramerL071(isp, workers, dataGridView1, serialPort1, serialPort2, cbcom, cbproperty, SerialFlash, checkfile1, checkfile2, checkfile3, cfilepath1, cfilepath2,
-            cfilepath3);///类传参数
+
 
             //if (File.Exists(System.Windows.Forms.Application.StartupPath + "\\info.json"))
             //{
@@ -74,61 +80,98 @@ namespace SerialPoart
             //}
             //Thread thr_save = new Thread(new ThreadStart(save_file_process));//创建线程  
             //thr_save.Start();//启动线程  
-
-
+            initDownFile();
             initconfig();
+            initReadJsonFile();
+            
+        }
+        private void initDownFile()
+        {
+
+            string downFilePath = "downFile.json";
+            Downinfo downInfo = null;            
+            if (File.Exists(downFilePath) == false)
+            {
+                MessageBox.Show("还没有存储过数据,已经重新生成");
+                FileStream file = File.Open(downFilePath, FileMode.Create);
+                file.Close();
+                return;
+            }
+            foreach (string line in File.ReadLines(downFilePath))
+            {
+                try
+                {
+                    downInfo = JsonConvert.DeserializeObject<Downinfo>(line);
+                    checkfile1.Checked = downInfo.checkbox[0];
+                    checkfile2.Checked = downInfo.checkbox[1];
+                    checkfile3.Checked = downInfo.checkbox[2];
+
+                    cfilepath1.Text = downInfo.filePath[0];
+                    cfilepath2.Text = downInfo.filePath[1];
+                    cfilepath3.Text = downInfo.filePath[2];
+
+                    initIndex = downInfo.initIndex;
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
         public void initconfig()
         {
+            int x = 30;
+            int y = 38;
             for(int i =0; i < 12; i ++)
             {
                 CheckBox checkBox3 = new CheckBox();
+                checkBox3.Location = new Point(x, y);
+                checkBox3.Text = "";
+                checkBox3.Size = new Size(17, 17);
                 g_tempInitlist.select.Add(checkBox3);
+
+                CheckBox checkBox2 = new CheckBox();
+                checkBox2.Location = new Point(x + 58, y);
+                checkBox2.Text = "";
+                checkBox2.Size = new Size(17, 17);
                 g_tempInitlist.hex.Add(checkBox2);
+
+                TextBox textBox3 = new TextBox();
+                textBox3.Location = new Point(x + 110, y);
+                textBox3.Size = new Size(100, 25);
                 g_tempInitlist.address.Add(textBox3);
+
+                TextBox textBox2 = new TextBox();
+                textBox2.Location = new Point(x + 220, y);
+                textBox2.Size = new Size(133, 25);
                 g_tempInitlist.data.Add(textBox2);
+
+                TextBox textBox1 = new TextBox();
+                textBox1.Location = new Point(x + 370, y);
+                textBox1.Size = new Size(100, 25);
                 g_tempInitlist.info.Add(textBox1);
+                y += 30;
+
+                panel1.Controls.Add(checkBox3);
+                panel1.Controls.Add(checkBox2);
+                panel1.Controls.Add(textBox3);
+                panel1.Controls.Add(textBox2);
+                panel1.Controls.Add(textBox1);
+
+                g_tempInitlist.index.Add(i);
             }
         }
-        public void save_file_process()
-        {
-            //while(true)
-            //{
-            //    Thread.Sleep(4000);
-            //    if (set_path || sp_programme.get_path)
-            //    {
-            //        File.WriteAllText("info.json", JsonConvert.SerializeObject(Path));
-            //        set_path = false;
-            //        sp_programme.get_path = false;
-            //    }         
-            //}           
-        }
 
-        /*串口应用*/      
-        public void cbcom_DropDown(object sender, EventArgs e)  //更新串口列表
-        {
-            //string[] ports = System.IO.Ports.SerialPort.GetPortNames();
 
-            //cbcom.Items.Clear();
-            //for (int i = 0; i < ports.Length; i++)
-            //{
-            //    string name = ports[i];
-            //    cbcom.Items.Add(name);
-            //}
-            //if (ports.Length > 0)
-            //    cbcom.Text = ports[0];
-            //else
-            //    cbcom.Text = null;
-        }
 
-        public void download3_Click(object sender, EventArgs e)
-        {
-            sp_programme.UseDownLoad3();
-        }
 
         int StartEraseCount = 0;
         private void StartEraseFlash_Click(object sender, EventArgs e)
         {
+            Button bt = (Button)sender;
+            bt.BackColor = Color.Blue;
+            bt.Text = "下载中";
+            isp.UseISPProgramerL071(isp, workers, dataConver(g_tempInitlist), serialPort1, serialPort2, cbcom, cbproperty, SerialFlash, checkfile1, checkfile2, checkfile3, cfilepath1, cfilepath2,
+            cfilepath3);///类传参数
             if (StartEraseCount % 2 == 0)
             {
                 StartEraseCount++;
@@ -139,12 +182,15 @@ namespace SerialPoart
                 if (firmwares == null)
                 {
                     this.SerialFlash.AppendText("请选择烧写文件\r\n");
+                    bt.BackColor = Color.Red;
                     return;
                 }
 
                 if (!EraseCheckSerial(BAUDRATE)) ///擦除检验串口
                 {
                     this.SerialFlash.AppendText("串口初始化失败\r\n");
+                    bt.BackColor = Color.Red;
+                    return;
                 }
                 else
                     this.SerialFlash.AppendText("开始烧写文件\r\n");
@@ -152,15 +198,25 @@ namespace SerialPoart
                 Action<bool> runAction = new Action<bool>((re) =>
                 {
                     this.StartEraseFlash.Text = "取消";
+                    bt.BackColor = Color.White;
                     StartEraseCount = 0;
                 });
-
-                BackgroundWorker worker = isp.WriteData(firmwares, runAction);
+                bool status = false;
+                BackgroundWorker worker = isp.WriteData(firmwares, runAction,ref status);
+                if(status == true)
+                {
+                    bt.BackColor = Color.White;
+                    bt.Text = "下载成功";
+                }
+                else
+                {
+                    bt.Text = "开始下载";
+                    bt.BackColor = Color.Red;
+                }
                 if (worker != null)
                 {
                     this.StartEraseFlash.Text = "开始烧写";
-                    StartEraseCount = 0;
-                    //worker.RunWorkerAsync();
+                    StartEraseCount = 0;                    
                 }
             }
             else if (StartEraseCount % 2 == 1)
@@ -329,36 +385,117 @@ namespace SerialPoart
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
+            if(cbcom.Items.Count != ports.Length)
+            {
+                try
+                {
+                    cbcom.Items.Clear();
+                    cbcom.Text = "";
+                    cbcom.Items.AddRange(ports);
+                    cbcom.SelectedIndex = 0;
+                }
+                catch (Exception)
+                {                    
+                }
 
+            }
         }
-        List<initList> initLists = new List<initList>();
-        string initPath = "init.json";
-        public int initIndex = 0;
-        private initList g_tempInitlist;
+
+        private initListinfo dataConver(initList init)
+        {
+            initListinfo info = new initListinfo();
+            info.name = init.name;
+            for(int i = 0; i < init.hex.Count; i ++)
+            {
+                info.hex.Add(init.hex[i].Checked);
+                info.index.Add(init.index[i]);
+                info.select.Add(init.select[i].Checked);
+                info.address.Add(init.address[i].Text);
+                info.data.Add(init.data[i].Text);
+                info.info.Add(init.info[i].Text);
+            }
+            return info;
+        }
+        private void DataConverObject(initListinfo info)
+        {
+            g_tempInitlist.name = info.name;            
+            for (int i = 0; i < info.hex.Count; i++)
+            {
+                g_tempInitlist.hex[i].Checked = info.hex[i];
+                g_tempInitlist.index[i] = info.index[i];
+                g_tempInitlist.select[i].Checked = info.select[i];
+                g_tempInitlist.address[i].Text = info.address[i];
+                g_tempInitlist.data[i].Text = info.data[i];
+                g_tempInitlist.info[i].Text = info.info[i];
+            }            
+        }
+
+        private void initReadJsonFile()
+        {
+            initListinfo info = null;
+            List<string> initNames = new List<string>();
+            if (File.Exists(initPath) == false)
+            {
+                MessageBox.Show("还没有存储过数据,已经重新生成");
+                FileStream file = File.Open(initPath, FileMode.Create);
+                file.Close();
+                return;
+            }
+            foreach (string line in File.ReadLines(initPath))
+            {
+                try
+                {
+                    info = JsonConvert.DeserializeObject<initListinfo>(line);
+                    initNames.Add(info.name);
+
+                    initLists.Add(info);
+                    SerialFlash.AppendText(info.name + "\r\n");
+                    initNameCombox.Items.Add(info.name);
+                }
+                catch (Exception)
+                {
+                    //SerialFlash.AppendText("读取错误了一个" + info.name + "\r\n");
+                    initLists.Remove(info);
+                }
+            }
+            try
+            {
+                initNameCombox.SelectedIndex = initIndex;
+                DataConverObject(initLists[initIndex]);
+            }
+            catch (Exception)
+            {
+            }         
+        }
         private void open_initButton_Click(object sender, EventArgs e)
         {
             // JsonConvert.SerializeObject(one);
             //JsonConvert.DeserializeObject<Student>(str);
-            initList init;            
-            List<string> initNames = new List<string>();            
-            foreach (string line in File.ReadLines(initPath))
-            {
-                init = JsonConvert.DeserializeObject<initList>(line);
-                initNames.Add(init.name);
-                initLists.Add(init);
-                SerialFlash.AppendText(init.name + "\r\n");
-            }
-            g_tempInitlist = initLists[initIndex];
+            DataConverObject(initLists[initIndex]);
         }
-
         private void save_initButton_Click(object sender, EventArgs e)
         {
             FileStream file = File.Open(initPath, FileMode.Create);
-            initLists[initIndex] = g_tempInitlist;
-            foreach (initList init in initLists)
+            if(initNameCombox.Text == "")
             {
-                string strinit = JsonConvert.SerializeObject(file);
-                byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit);
+                MessageBox.Show("请填写保存的名字");
+                return;
+            }
+            g_tempInitlist.name = initNameCombox.Text;
+            if (initLists.Count == 0)
+            {
+                initLists.Add(dataConver(g_tempInitlist));
+                initIndex = 0;
+            }
+            else
+            {
+                initLists[initIndex] = dataConver(g_tempInitlist);
+            }            
+            foreach (initListinfo info in initLists)
+            {
+                string strinit = JsonConvert.SerializeObject(info);
+                byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit+"\r\n");
                 file.Write(byteArray,0,byteArray.Length);
             }
             SerialFlash.AppendText("name:"+ initLists[initIndex].name + "had save success"+ "\r\n");
@@ -366,13 +503,90 @@ namespace SerialPoart
         }
         private void clean_initButton_Click(object sender, EventArgs e)
         {            
-            //g_tempInitlist.hex.Clear();
-            //g_tempInitlist.info.Clear();
-            //g_tempInitlist.select.Clear();
-            //g_tempInitlist.address.Clear();
-            //g_tempInitlist.index.Clear();
+            if(MessageBox.Show("你确定需要删除这条数据?","提示",MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                try
+                {
+                    initLists.RemoveAt(initIndex);
+                    FileStream file = File.Open(initPath, FileMode.Create);
+                    foreach (initListinfo info in initLists)
+                    {
+                        string strinit = JsonConvert.SerializeObject(info);
+                        byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit);
+                        file.Write(byteArray, 0, byteArray.Length);
+                    }
+                    initNameCombox.Items.RemoveAt(initIndex);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("删除失败");
+                    return;
+                }
+                MessageBox.Show("删除成功");
+            }
+        }
+        private void initNameCombox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ComboBox cb = (ComboBox)sender;
+            initIndex = cb.SelectedIndex;
+        }
+        public void download3_Click(object sender, EventArgs e)
+        {
+            sp_programme.UseDownLoad(3);
+        }
+        private void download2_Click(object sender, EventArgs e)
+        {
+            sp_programme.UseDownLoad(2);
+        }
+
+        private void download1_Click(object sender, EventArgs e)
+        {
+            sp_programme.UseDownLoad(1);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Downinfo downInfo = new Downinfo();
+            downInfo.initIndex = initIndex;
+            downInfo.checkbox[0] = checkfile1.Checked;
+            downInfo.checkbox[1] = checkfile2.Checked;
+            downInfo.checkbox[2] = checkfile3.Checked;
+
+            downInfo.filePath[0] = cfilepath1.Text;
+            downInfo.filePath[1] = cfilepath2.Text;
+            downInfo.filePath[2] = cfilepath3.Text;
+
+            initPath = "downFile.json";
+            FileStream file = File.Open(initPath, FileMode.Create);            
+            string strinit = JsonConvert.SerializeObject(downInfo);
+            byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit);
+            file.Write(byteArray, 0, byteArray.Length);
 
         }
+        
+        private void newBtn_Click(object sender, EventArgs e)
+        {            
+            try
+            {
+                initListinfo temp = new initListinfo();
+                initLists.Add(temp);
+                initNameCombox.Items.Add("");
+                initNameCombox.Text = "";
+                initIndex = initNameCombox.Items.Count - 1;
+            }
+            catch (Exception)
+            {                
+            }
+            
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            string cmd = this.textBox1.Text;
+            cmd = cmd + CRC.ToModbusCRC16(cmd);
+            this.textBox2.Text = cmd;            
+        }
     }
-    
+
 }
+
