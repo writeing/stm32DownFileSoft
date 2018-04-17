@@ -531,7 +531,6 @@ namespace Serial_second
             {
                 return false;
             }
-
             UInt32 offset = 0;
             while (offset < length)
             {
@@ -600,7 +599,7 @@ namespace Serial_second
                 throw new ArgumentOutOfRangeException("地址或数据长度非法\r\n");
             }
 
-            _TextBox.AppendText("length" + length + "\r\n");
+            _TextBox.AppendText("length = " + length + "\r\n");
             if (length % 4 != 0)
             {
                 List<byte> temp = new List<byte>();
@@ -627,49 +626,8 @@ namespace Serial_second
             //_TextBox.AppendText("page" + page + "\r\n");
 
             if (length > PageSize)//写入的是烧录文件
-            {
-                if (erase_allFash() == true)
-                {
-                    _TextBox.AppendText("擦除成功");
-                }
-                else
-                {
-                    _TextBox.AppendText("擦除失败");
-                }
-                //for (page = startPage; page <= talePage; page++)        //先擦除数据
-                //{
-                //    pagesToErase.Add(page); ///将要擦除数据分页保存到数组中
-                //}
-                //if (pagesToErase.Count != 0)
-                //{
-                //    if (this.BootloaderVer < (float)3)//L07X 系列都不会小于3
-                //        return false;
-                //    else
-                //    {
-                //        List<ushort> pagesToErase16 = new List<ushort>();
-                //        foreach (var item in pagesToErase)
-                //        {
-                //            pagesToErase16.Add(item);
-                //        }
-                //        this.ReportProgress(0, "擦除flash\r\n");
-                //        _TextBox.AppendText("擦除flash\r\n");
-                //        for (int i = 0; i < pagesToErase.Count; i++)
-                //        {
-                //            if (!this.ExternErase(pagesToErase16[i]))   //擦除所有页 pagesToErase16[i])：擦除页：每页128B
-                //            {
-                //                this.ReportProgress(100, "flash擦除失败\r\n");
-                //                _TextBox.AppendText("flash擦除失败\r\n");
-                //                return false;
-                //            }
-                //            else
-                //            {
-                //                //this.ReportProgress((int)((i * 100) / pagesToErase.Count)); ///进度条显示
-                //            }
-                //        }                     
-                //    }
-                //}
-                //this.ReportProgress(0, "开始写入文件数据\r\n");
-                _TextBox.AppendText("开始写入文件数据" + length + "\r\n");
+            {             
+                _TextBox.AppendText("开始写入文件数据:" + length + "\r\n");
                 UInt32 offset = 0;
                 while (length > 0)
                 {
@@ -690,16 +648,15 @@ namespace Serial_second
                 }
                 //this.ReportProgress(100, "写入完成\r\n");
                 _TextBox.AppendText("写入完成\r\n");
-            }
-           
+            }           
             else//写入的是自定义数据，自定义数据不能大于1页大小
             {
-                this.ReportProgress(0, "开始写入自定义数据\r\n");
+                //this.ReportProgress(0, "开始写入自定义数据\r\n");
                 _TextBox.AppendText("开始写入自定义数据\r\n");
                 //this.ReportProgress(100, "暂时不支持\r\n");
                 if (startPage != talePage)//数据跨页
                 {
-                    this.ReportProgress(0, "自定义数据长度较长，最大为" + PageSize.ToString() + "字节\r\n");
+                    //this.ReportProgress(0, "自定义数据长度较长，最大为:" + PageSize.ToString() + "字节\r\n");
                     return false;
                 }
                 UInt32 add = FLASH_BASE_ADDR + page * PageSize;         //读一页
@@ -732,7 +689,7 @@ namespace Serial_second
                 {
                     return false;
                 }
-                this.ReportProgress(100, "写入完成\r\n");
+                //this.ReportProgress(100, "写入完成\r\n");
                 _TextBox.AppendText("写入完成\r\n");
                 return true;
             }
@@ -885,25 +842,22 @@ namespace Serial_second
                 }
             }
 
-            this.ReportProgress(0, "检查flash\r\n");
-
             if (!this.ReadFlash(address, length).IsEmpty())
             {
-                this.ReportProgress(0, "擦除flash\r\n");
                 if (!this.EraseMem(address, length))
                 {
-                    this.ReportProgress(100, "擦除失败\r\n");
+                    //this.ReportProgress(100, "擦除失败\r\n");
                     return false;
                 }
                 else
                 {
-                    this.ReportProgress(100, "擦除成功\r\n");
+                    //this.ReportProgress(100, "擦除成功\r\n");
                 }
             }
 
             UInt32 offset = 0;
 
-            this.ReportProgress(0, "开始写入...\r\n");
+            //this.ReportProgress(0, "开始写入...\r\n");
 
             while (length > 0)
             {
@@ -921,9 +875,9 @@ namespace Serial_second
                 offset += (UInt32)(1 + len);
                 length -= (UInt32)(1 + len);
 
-                this.ReportProgress((int)((offset * 100) / (length + offset)));
+                //this.ReportProgress((int)((offset * 100) / (length + offset)));
             }
-            this.ReportProgress(100, "写入完成\r\n");
+            //this.ReportProgress(100, "写入完成\r\n");
             return true;
         }
         #endregion
@@ -1351,7 +1305,7 @@ namespace Serial_second
                 result.File1 = this._file_path1.Text;
                 firmwares.Add(firmware);
             }
-            else if (this._check_file2.Checked)
+            if (this._check_file2.Checked)
             {
                 FirmwareInfomation firmware = this.ReadFile(this._file_path2.Text);
                 if (firmware.Error != null)
@@ -1362,7 +1316,7 @@ namespace Serial_second
                 result.File2 = this._file_path2.Text;
                 firmwares.Add(firmware);
             }
-            else if (this._check_file3.Checked)
+            if (this._check_file3.Checked)
             {
                 FirmwareInfomation firmware = this.ReadFile(this._file_path3.Text);
                 if (firmware.Error != null)
@@ -1462,7 +1416,15 @@ namespace Serial_second
                     //lock (_isp)
                     {
                     //this._work.Add(worker);
-                        foreach (FirmwareInfomation item in list)
+                    if (erase_allFash() == true)
+                    {
+                        _TextBox.AppendText("擦除成功");
+                    }
+                    else
+                    {
+                        _TextBox.AppendText("擦除失败");
+                    }
+                    foreach (FirmwareInfomation item in list)
                         {
                             //if (worker.CancellationPending == true)
                             //{
@@ -1470,7 +1432,7 @@ namespace Serial_second
                             //    break;
                             //}
                             //worker.ReportProgress(0, "开始烧录" + item.Name + "\r\n");
-                            _TextBox.AppendText("读取文件"+ item.BaseAddress  + "\r\n");
+                            _TextBox.AppendText("读取文件地址 = "+ item.BaseAddress  + "\r\n");
                             ret = this.WriteFlash(item.BaseAddress, item.Data);
                             if (!ret)
                             {

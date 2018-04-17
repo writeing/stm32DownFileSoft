@@ -161,9 +161,6 @@ namespace SerialPoart
             }
         }
 
-
-
-
         int StartEraseCount = 0;
         private void StartEraseFlash_Click(object sender, EventArgs e)
         {
@@ -419,15 +416,18 @@ namespace SerialPoart
         }
         private void DataConverObject(initListinfo info)
         {
-            g_tempInitlist.name = info.name;            
+            g_tempInitlist.name = info.name;
+            System.Text.ASCIIEncoding asciiEncoding = new System.Text.ASCIIEncoding();
             for (int i = 0; i < info.hex.Count; i++)
             {
+                
                 g_tempInitlist.hex[i].Checked = info.hex[i];
                 g_tempInitlist.index[i] = info.index[i];
                 g_tempInitlist.select[i].Checked = info.select[i];
                 g_tempInitlist.address[i].Text = info.address[i];
-                g_tempInitlist.data[i].Text = info.data[i];
+                g_tempInitlist.data[i].Text = info.data[i];                
                 g_tempInitlist.info[i].Text = info.info[i];
+                //g_tempInitlist.info[i].Text = info.info[i];
             }            
         }
 
@@ -441,7 +441,7 @@ namespace SerialPoart
                 FileStream file = File.Open(initPath, FileMode.Create);
                 file.Close();
                 return;
-            }
+            }            
             foreach (string line in File.ReadLines(initPath))
             {
                 try
@@ -476,8 +476,8 @@ namespace SerialPoart
         }
         private void save_initButton_Click(object sender, EventArgs e)
         {
-            FileStream file = File.Open(initPath, FileMode.Create);
-            if(initNameCombox.Text == "")
+            FileStream file = File.Open(initPath, FileMode.Create);            
+            if (initNameCombox.Text == "")
             {
                 MessageBox.Show("请填写保存的名字");
                 return;
@@ -495,7 +495,8 @@ namespace SerialPoart
             foreach (initListinfo info in initLists)
             {
                 string strinit = JsonConvert.SerializeObject(info);
-                byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit+"\r\n");
+                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(strinit + "\r\n");
+                //byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit+"\r\n");
                 file.Write(byteArray,0,byteArray.Length);
             }
             SerialFlash.AppendText("name:"+ initLists[initIndex].name + "had save success"+ "\r\n");
@@ -559,7 +560,7 @@ namespace SerialPoart
             initPath = "downFile.json";
             FileStream file = File.Open(initPath, FileMode.Create);            
             string strinit = JsonConvert.SerializeObject(downInfo);
-            byte[] byteArray = System.Text.Encoding.Default.GetBytes(strinit);
+            byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(strinit);
             file.Write(byteArray, 0, byteArray.Length);
 
         }
