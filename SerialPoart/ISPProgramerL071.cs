@@ -633,7 +633,7 @@ namespace Serial_second
                 {
                     //_TextBox.AppendText("开始烧写" + length + "\r\n");
                     UInt32 inPageAddr = address - FLASH_BASE_ADDR + offset;
-                    byte len = length > 0x80 ? (byte)0x7f : (byte)(length - 1);
+                    byte len = length > PageSize ? (byte)(0x7F) : (byte)(length - 1);
                     byte[] wData = new byte[len + 1];
                     Array.Copy(data, offset, wData, 0, len + 1);
                     if (!this.Write((address + offset).ToAddressArray(), wData)) ///0x8000000+offset
@@ -660,9 +660,9 @@ namespace Serial_second
                     return false;
                 }
                 UInt32 add = FLASH_BASE_ADDR + page * PageSize;         //读一页
-                byte[] FlashData = this.Read(add.ToAddressArray(), 0x80 - 1);
+                byte[] FlashData = this.Read(add.ToAddressArray(), 0x7F);
                 //修改数据
-                for (int i = 0; i < 0x80; i++)
+                for (int i = 0; i < PageSize; i++)
                 {
                     if (address == add + i)
                     {
@@ -676,11 +676,11 @@ namespace Serial_second
                 {
                     List<ushort> pagesToErase16 = new List<ushort>();
                     pagesToErase16.Add(page);
-                    this.ReportProgress(0, "擦除flash\r\n");
+                    //this.ReportProgress(0, "擦除flash\r\n");
                     _TextBox.AppendText("擦除flash\r\n");
                     if (!this.ExternErase(pagesToErase16.ToArray()))    //擦除所有页
                     {
-                        this.ReportProgress(0, "flash擦除失败\r\n");
+                        //this.ReportProgress(0, "flash擦除失败\r\n");
                         _TextBox.AppendText("flash擦除失败\r\n");
                         return false;
                     }
@@ -863,7 +863,7 @@ namespace Serial_second
             {
                 UInt32 inPageAddr = address - FLASH_BASE_ADDR + offset;
                 byte page = (byte)((inPageAddr) / PageSize);
-                byte len = length > 0x80 ? (byte)0x80 : (byte)(length - 1);
+                byte len = length > PageSize ? (byte)PageSize : (byte)(length - 1);
                 byte[] addr = BitConverter.GetBytes(address + offset);
                 Array.Reverse(addr);
                 byte[] wData = new byte[len + 1];
@@ -1423,6 +1423,7 @@ namespace Serial_second
                     else
                     {
                         _TextBox.AppendText("擦除失败");
+                        return null;
                     }
                     foreach (FirmwareInfomation item in list)
                         {
@@ -1432,7 +1433,7 @@ namespace Serial_second
                             //    break;
                             //}
                             //worker.ReportProgress(0, "开始烧录" + item.Name + "\r\n");
-                            _TextBox.AppendText("读取文件地址 = "+ item.BaseAddress  + "\r\n");
+                            _TextBox.AppendText("读取文件地址 = "+ item.BaseAddress.ToString("X")  + "\r\n");
                             ret = this.WriteFlash(item.BaseAddress, item.Data);
                             if (!ret)
                             {

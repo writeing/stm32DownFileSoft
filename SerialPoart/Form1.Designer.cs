@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.button2 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -57,6 +58,7 @@
             this.Reset = new System.Windows.Forms.Button();
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
+            this.newBtn = new System.Windows.Forms.Button();
             this.initNameCombox = new System.Windows.Forms.ComboBox();
             this.save_initButton = new System.Windows.Forms.Button();
             this.clean_initButton = new System.Windows.Forms.Button();
@@ -66,7 +68,6 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.newBtn = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
@@ -195,35 +196,38 @@
             // 
             // download2
             // 
+            this.download2.BackColor = System.Drawing.SystemColors.Control;
             this.download2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.download2.Location = new System.Drawing.Point(445, 87);
             this.download2.Name = "download2";
             this.download2.Size = new System.Drawing.Size(57, 26);
             this.download2.TabIndex = 33;
             this.download2.Text = "...";
-            this.download2.UseVisualStyleBackColor = true;
+            this.download2.UseVisualStyleBackColor = false;
             this.download2.Click += new System.EventHandler(this.download2_Click);
             // 
             // download1
             // 
+            this.download1.BackColor = System.Drawing.SystemColors.Control;
             this.download1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.download1.Location = new System.Drawing.Point(445, 49);
             this.download1.Name = "download1";
             this.download1.Size = new System.Drawing.Size(57, 26);
             this.download1.TabIndex = 34;
             this.download1.Text = "...";
-            this.download1.UseVisualStyleBackColor = true;
+            this.download1.UseVisualStyleBackColor = false;
             this.download1.Click += new System.EventHandler(this.download1_Click);
             // 
             // download3
             // 
+            this.download3.BackColor = System.Drawing.SystemColors.Control;
             this.download3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.download3.Location = new System.Drawing.Point(445, 127);
             this.download3.Name = "download3";
             this.download3.Size = new System.Drawing.Size(57, 26);
             this.download3.TabIndex = 35;
             this.download3.Text = "...";
-            this.download3.UseVisualStyleBackColor = true;
+            this.download3.UseVisualStyleBackColor = false;
             this.download3.Click += new System.EventHandler(this.download3_Click);
             // 
             // timer1
@@ -323,6 +327,16 @@
             this.panel1.Size = new System.Drawing.Size(522, 451);
             this.panel1.TabIndex = 59;
             // 
+            // newBtn
+            // 
+            this.newBtn.Location = new System.Drawing.Point(237, 403);
+            this.newBtn.Name = "newBtn";
+            this.newBtn.Size = new System.Drawing.Size(83, 39);
+            this.newBtn.TabIndex = 70;
+            this.newBtn.Text = "新增";
+            this.newBtn.UseVisualStyleBackColor = true;
+            this.newBtn.Click += new System.EventHandler(this.newBtn_Click);
+            // 
             // initNameCombox
             // 
             this.initNameCombox.FormattingEnabled = true;
@@ -407,16 +421,6 @@
             this.label7.TabIndex = 0;
             this.label7.Text = "hex";
             // 
-            // newBtn
-            // 
-            this.newBtn.Location = new System.Drawing.Point(237, 403);
-            this.newBtn.Name = "newBtn";
-            this.newBtn.Size = new System.Drawing.Size(83, 39);
-            this.newBtn.TabIndex = 70;
-            this.newBtn.Text = "新增";
-            this.newBtn.UseVisualStyleBackColor = true;
-            this.newBtn.Click += new System.EventHandler(this.newBtn_Click);
-            // 
             // textBox1
             // 
             this.textBox1.Location = new System.Drawing.Point(3, 469);
@@ -484,6 +488,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button2);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load_1);

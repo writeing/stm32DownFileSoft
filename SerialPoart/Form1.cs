@@ -42,6 +42,7 @@ namespace SerialPoart
         string initPath = "init.json";
         public int initIndex = 0;
         private initList g_tempInitlist = new initList();
+        public hstoryCombox g_hcom;
         //********************************************************
         ///调用类
         public Form1()
@@ -83,11 +84,44 @@ namespace SerialPoart
             initDownFile();
             initconfig();
             initReadJsonFile();
-            
+            initComboxHistory();
+        }
+        private void initComboxHistory()
+        {
+            string downFilePath = "historyCombox.json";
+            if (File.Exists(downFilePath) == false)
+            {
+                MessageBox.Show("还没有存储过数据,已经重新生成");
+                FileStream file = File.Open(downFilePath, FileMode.Create);
+                g_hcom = new hstoryCombox();
+                file.Close();
+                return;
+            }
+            foreach (string line in File.ReadLines(downFilePath))
+            {
+                try
+                {
+                    g_hcom = JsonConvert.DeserializeObject<hstoryCombox>(line);
+                    foreach (string path in g_hcom.file1)
+                    {
+                        cfilepath1.Items.Add(path);
+                    }
+                    foreach (string path in g_hcom.file2)
+                    {
+                        cfilepath2.Items.Add(path);
+                    }
+                    foreach (string path in g_hcom.file3)
+                    {
+                        cfilepath3.Items.Add(path);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
         private void initDownFile()
         {
-
             string downFilePath = "downFile.json";
             Downinfo downInfo = null;            
             if (File.Exists(downFilePath) == false)
@@ -199,11 +233,12 @@ namespace SerialPoart
                     StartEraseCount = 0;
                 });
                 bool status = false;
-                BackgroundWorker worker = isp.WriteData(firmwares, runAction,ref status);
-                if(status == true)
+                BackgroundWorker worker = isp.WriteData(firmwares, runAction,ref status);                
+                if (status == true)
                 {
                     bt.BackColor = Color.White;
                     bt.Text = "下载成功";
+                    StartEraseCount = 0;
                 }
                 else
                 {
@@ -534,15 +569,18 @@ namespace SerialPoart
         public void download3_Click(object sender, EventArgs e)
         {
             sp_programme.UseDownLoad(3);
+            g_hcom.file3.Add(cfilepath3.Text);
         }
         private void download2_Click(object sender, EventArgs e)
         {
             sp_programme.UseDownLoad(2);
+            g_hcom.file2.Add(cfilepath2.Text);
         }
 
         private void download1_Click(object sender, EventArgs e)
         {
             sp_programme.UseDownLoad(1);
+            g_hcom.file1.Add(cfilepath1.Text);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -562,6 +600,15 @@ namespace SerialPoart
             string strinit = JsonConvert.SerializeObject(downInfo);
             byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(strinit);
             file.Write(byteArray, 0, byteArray.Length);
+            file.Close();
+
+
+            initPath = "historyCombox.json";
+            file = File.Open(initPath, FileMode.Create);
+            strinit = JsonConvert.SerializeObject(g_hcom);
+            byteArray = System.Text.Encoding.UTF8.GetBytes(strinit);
+            file.Write(byteArray, 0, byteArray.Length);
+            file.Close();
 
         }
         

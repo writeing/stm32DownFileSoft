@@ -7,6 +7,13 @@ using System.Windows.Forms;
 
 namespace SerialPoart
 {
+
+    public class hstoryCombox
+    {
+        public List<string> file1 = new List<string>();
+        public List<string> file2 = new List<string>();
+        public List<string> file3 = new List<string>();
+    }
     public class initList
     {
         public string name;
