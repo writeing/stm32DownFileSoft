@@ -122,14 +122,14 @@ namespace Serial_second
         private bool cancelPending = false;
 
         private TextBox _TextBox = null;
-
+        private RichTextBox _richBox = null;
         ISPProgramerL071 _isp;
         public DataGridView customDataGridView;
 
         public ISPProgramerL071() { }
 
         public void UseISPProgramerL071(ISPProgramerL071 sp, List<BackgroundWorker> work, initListinfo initLists, SerialPort srt1, SerialPort srt2, ComboBox ComNum1, ComboBox property,TextBox SerialText, CheckBox Checkfile1, CheckBox Checkfile2, CheckBox Checkfile3,
-            ComboBox Filepath1, ComboBox Filepath2, ComboBox Filepath3)
+            ComboBox Filepath1, ComboBox Filepath2, ComboBox Filepath3,RichTextBox rtb = null)
         {
             _isp = sp;
 
@@ -152,9 +152,18 @@ namespace Serial_second
 
             _file_path1 = Filepath1;
             _file_path2 = Filepath2;
-            _file_path3 = Filepath3;           
-        }
+            _file_path3 = Filepath3;
 
+            _richBox = rtb;
+        }
+        public void _showMessRich(string str)
+        {
+            if(_richBox == null)
+            {
+                return;
+            }
+            _richBox.AppendText(str + "\r\n");
+        }
         private void ReportProgress(int pec, object o) ///进度条
         {
             if (this.cancelPending == true)
@@ -393,22 +402,37 @@ namespace Serial_second
             /********************设置串口发送超时机制*****************/
             port2.WriteTimeout = 500;
             port2.ReadTimeout = 500;
+            try
+            {
+                port2.Write(new byte[] { data }, 0, 1);
+            }
+            catch (Exception)
+            {
 
-            port2.Write(new byte[] { data }, 0, 1);
+                return false;
+            }
+            
             Thread.Sleep(1); //增加延时要解决读取失败问题
             port2.Write(new byte[] { (byte)(data ^ 0xff) }, 0, 1);
             try
-           {
+            { 
                 byte a = (byte)this.port2.ReadByte();
-                //_TextBox.Text += "retryCountok: " + " a: 0x" + a.ToString("X2") + "\r\n";
-                return (a == ACK_REPLY);
-           }
-           catch (Exception)
-           {
-                //_TextBox.Text += "retryCounterror: " + "\r\n";
+                if (a != ACK_REPLY)
+                {
+                    _showMessRich(a.ToString("X"));
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+                //return (a == ACK_REPLY);
+            }
+            catch (Exception)
+            {
                 return false;
-           }
-
+            }
+           
         }
         #endregion
 
@@ -496,6 +520,7 @@ namespace Serial_second
         /// <returns></returns>
         public bool erase_allFash()
         {
+
             ReadOutProtect();
             {
                 Thread.Sleep(500);
@@ -575,7 +600,12 @@ namespace Serial_second
                 byte[] d = this.Read(addr.ToAddressArray(), (byte)(len - 1));
                 if (d == null)
                 {
-                    return null;
+
+                    d = this.Read(addr.ToAddressArray(), (byte)(len - 1));
+                    if (d == null)
+                    {
+                        return null;
+                    }
                 }
                 Array.Copy(d, 0, data, offset, len);
                 offset += len;
@@ -636,10 +666,16 @@ namespace Serial_second
                     byte len = length > PageSize ? (byte)(0x7F) : (byte)(length - 1);
                     byte[] wData = new byte[len + 1];
                     Array.Copy(data, offset, wData, 0, len + 1);
+
                     if (!this.Write((address + offset).ToAddressArray(), wData)) ///0x8000000+offset
                     {
-                        _TextBox.AppendText("写入false\r\n");
-                        return false;
+                        _showMessRich((address + offset).ToString("X"));
+                        Reset_Serial_Port();
+                        if (!this.Write((address + offset).ToAddressArray(), wData))
+                        {
+                            _TextBox.AppendText("写入false\r\n");
+                            return false;
+                        }                                                
                     }
                     offset += (UInt32)(1 + len);
                     length -= (UInt32)(1 + len);
@@ -1247,8 +1283,15 @@ namespace Serial_second
         {
             port2.WriteTimeout = 500;
             port2.ReadTimeout = 500;
-
-            port2.Write(new byte[] { READOUT_UNPROTECT_COMMAND }, 0, 1);
+            try
+            {
+                port2.Write(new byte[] { READOUT_UNPROTECT_COMMAND }, 0, 1);
+            }
+            catch (Exception)
+            {
+                return false;                
+            }
+            
             Thread.Sleep(10);
             port2.Write(new byte[] { (byte)(READOUT_UNPROTECT_COMMAND ^ 0xff) }, 0, 1);
             try
@@ -1407,50 +1450,54 @@ namespace Serial_second
             writeWork.WorkerReportsProgress = true;
             writeWork.WorkerSupportsCancellation = true;
             writeWork.ProgressChanged += WriteWork_ProgressChanged; ///添加烧写进度条
-            //writeWork.DoWork += new DoWorkEventHandler(delegate (Object o, DoWorkEventArgs e)
-            //{
-                //BackgroundWorker worker = (BackgroundWorker)o;
-                bool ret = true;
-                //if (e.Argument == null || (bool)e.Argument)
+            bool ret = true;
                 {
-                    //lock (_isp)
                     {
-                    //this._work.Add(worker);
-                    if (erase_allFash() == true)
+                    if(ExternErase(0xFF) == true)
                     {
                         _TextBox.AppendText("擦除成功");
                     }
                     else
                     {
-                        _TextBox.AppendText("擦除失败");
-                        return null;
-                    }
+                        _TextBox.AppendText("擦除失败1");
+                        _showMessRich("擦除失败1");
+
+                        if (erase_allFash() == true)
+                        {
+                            _TextBox.AppendText("擦除成功");
+                        }
+                        else
+                        {
+                            _TextBox.AppendText("擦除失败2");
+                            _showMessRich("擦除失败2");
+                            return null;
+                        }
+                    }                    
                     foreach (FirmwareInfomation item in list)
                         {
-                            //if (worker.CancellationPending == true)
-                            //{
-                            //    e.Cancel = true;
-                            //    break;
-                            //}
-                            //worker.ReportProgress(0, "开始烧录" + item.Name + "\r\n");
                             _TextBox.AppendText("读取文件地址 = "+ item.BaseAddress.ToString("X")  + "\r\n");
                             ret = this.WriteFlash(item.BaseAddress, item.Data);
                             if (!ret)
                             {
                                 //worker.ReportProgress(0, "写入出错\r\n");
                                 _TextBox.AppendText("写入出错\r\n");
-                                break;
+                                _showMessRich("写入出错");
+                            break;
                             }
                             else
                             {
                             //worker.ReportProgress(0, "开始校验\r\n");
                                _TextBox.AppendText("开始校验\r\n");
                                byte[] d = this._isp.ReadFlash(item.BaseAddress, (UInt32)item.Data.Length);
+                               if(d == null)
+                               {
+                                 _showMessRich("读取失败");
+                               }
                                ret = (d != null && BitConverter.ToString(d).Equals(BitConverter.ToString(item.Data)));
                                 if (!ret)
                                 {
-                                    //worker.ReportProgress(0, "数据校验失败\r\n");
                                     _TextBox.AppendText("数据校验失败\r\n");
+                                    _showMessRich("数据校验失败");
                                     break;
                                 }
                                 else
@@ -1465,36 +1512,6 @@ namespace Serial_second
                     //e.Result = ret;
                 }
                 }
-                //else
-                //{
-                //    e.Result = false;
-                //    e.Cancel = true;
-                //}
-
-            //});
-            //writeWork.RunWorkerCompleted += new RunWorkerCompletedEventHandler(delegate (Object o, RunWorkerCompletedEventArgs e)
-            //{
-            //    this._work.Remove((BackgroundWorker)o);
-            //    bool ret = false;
-            //    if (e.Cancelled == true)
-            //    {
-            //        this._TextBox.AppendText("写入取消\r\n");
-            //    }
-            //    else if (e.Error != null)
-            //    {
-            //        this._TextBox.AppendText("写入中断:" + e.Error.Message + "\r\n");
-            //        FilesOperator.SaveLog("error.log", e.Error);
-            //    }
-            //    else if (e.Result != null)
-            //    {
-            //        ret = (bool)e.Result;
-            //    }
-            //    if (NextAction != null)
-            //    {
-            //        NextAction(ret);
-            //    }
-
-            //});
             return writeWork;
         }
 

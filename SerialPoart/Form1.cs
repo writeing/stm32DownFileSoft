@@ -85,6 +85,8 @@ namespace SerialPoart
             initconfig();
             initReadJsonFile();
             initComboxHistory();
+
+            this.Width -= 280;
         }
         private void initComboxHistory()
         {
@@ -196,19 +198,26 @@ namespace SerialPoart
         }
 
         int StartEraseCount = 0;
+        public int _downfileCoun = 0;
         private void StartEraseFlash_Click(object sender, EventArgs e)
         {
             Button bt = (Button)sender;
             bt.BackColor = Color.Blue;
             bt.Text = "下载中";
             isp.UseISPProgramerL071(isp, workers, dataConver(g_tempInitlist), serialPort1, serialPort2, cbcom, cbproperty, SerialFlash, checkfile1, checkfile2, checkfile3, cfilepath1, cfilepath2,
-            cfilepath3);///类传参数
+            cfilepath3,richTextBox1);///类传参数
             if (StartEraseCount % 2 == 0)
             {
-                StartEraseCount++;
+                //StartEraseCount++;
                 DeviceOperation device = new DeviceOperation();
 
                 List<FirmwareInfomation> firmwares = isp.GetDataToWrite(ref device); ///读取文件
+                Action<bool> runAction = new Action<bool>((re) =>
+                {
+                    this.StartEraseFlash.Text = "取消";
+                    bt.BackColor = Color.White;
+                    StartEraseCount = 0;
+                });
 
                 if (firmwares == null)
                 {
@@ -216,22 +225,22 @@ namespace SerialPoart
                     bt.BackColor = Color.Red;
                     return;
                 }
-
-                if (!EraseCheckSerial(BAUDRATE)) ///擦除检验串口
+                try
                 {
-                    this.SerialFlash.AppendText("串口初始化失败\r\n");
-                    bt.BackColor = Color.Red;
-                    return;
+                    if (!EraseCheckSerial(BAUDRATE)) ///擦除检验串口
+                    {
+                        this.SerialFlash.AppendText("串口已经被打开\r\n");
+                        bt.BackColor = Color.Red;
+                        return;
+                    }
+                    else
+                        this.SerialFlash.AppendText("开始烧写文件\r\n");
+
                 }
-                else
-                    this.SerialFlash.AppendText("开始烧写文件\r\n");
-
-                Action<bool> runAction = new Action<bool>((re) =>
+                catch (Exception)
                 {
-                    this.StartEraseFlash.Text = "取消";
-                    bt.BackColor = Color.White;
-                    StartEraseCount = 0;
-                });
+                    
+                }                
                 bool status = false;
                 BackgroundWorker worker = isp.WriteData(firmwares, runAction,ref status);                
                 if (status == true)
@@ -244,6 +253,11 @@ namespace SerialPoart
                 {
                     bt.Text = "开始下载";
                     bt.BackColor = Color.Red;
+                }
+                if (_downfileCoun-- > 0)
+                {
+                    textBox3.Text = _downfileCoun.ToString();
+                    StartEraseFlash_Click(StartEraseFlash, null);
                 }
                 if (worker != null)
                 {
@@ -633,6 +647,44 @@ namespace SerialPoart
             string cmd = this.textBox1.Text;
             cmd = cmd + CRC.ToModbusCRC16(cmd);
             this.textBox2.Text = cmd;            
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            _downfileCoun = Convert.ToInt32(textBox3.Text);
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            int index = 30;
+            while (true)
+            {
+                isp.UseISPProgramerL071(isp, workers, dataConver(g_tempInitlist), serialPort1, serialPort2, cbcom, cbproperty, SerialFlash, checkfile1, checkfile2, checkfile3, cfilepath1, cfilepath2,
+                cfilepath3, richTextBox1);///类传参数
+                EraseCheckSerial(115200);
+                isp.erase_allFash();
+                byte[] byteArray = new byte[1024 * 40];
+                for (int i = 0; i < byteArray.Length; i++)
+                    byteArray[i] = 0x11;
+                for (int i = 0; i < 1; i++)
+                {
+                    if (isp.WriteFlash(0x08000000, byteArray) == true)
+                    {
+                        richTextBox1.AppendText("write success\r\n");
+                    }
+                    else
+                        richTextBox1.AppendText("write false\r\n");
+                }
+                if (index-- == 0)
+                {
+                    break;
+                }
+                textBox3.Text = index.ToString();
+                this.Update();
+
+
+            }
         }
     }
 

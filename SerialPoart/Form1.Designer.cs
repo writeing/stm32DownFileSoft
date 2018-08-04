@@ -72,6 +72,10 @@
             this.button1 = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -129,7 +133,7 @@
             this.cbproperty.FormattingEnabled = true;
             this.cbproperty.Location = new System.Drawing.Point(82, 12);
             this.cbproperty.Name = "cbproperty";
-            this.cbproperty.Size = new System.Drawing.Size(420, 23);
+            this.cbproperty.Size = new System.Drawing.Size(420, 20);
             this.cbproperty.TabIndex = 23;
             // 
             // cbcom
@@ -137,7 +141,7 @@
             this.cbcom.FormattingEnabled = true;
             this.cbcom.Location = new System.Drawing.Point(2, 12);
             this.cbcom.Name = "cbcom";
-            this.cbcom.Size = new System.Drawing.Size(74, 23);
+            this.cbcom.Size = new System.Drawing.Size(74, 20);
             this.cbcom.TabIndex = 24;
             // 
             // cfilepath1
@@ -145,7 +149,7 @@
             this.cfilepath1.FormattingEnabled = true;
             this.cfilepath1.Location = new System.Drawing.Point(26, 52);
             this.cfilepath1.Name = "cfilepath1";
-            this.cfilepath1.Size = new System.Drawing.Size(413, 23);
+            this.cfilepath1.Size = new System.Drawing.Size(413, 20);
             this.cfilepath1.TabIndex = 26;
             // 
             // checkfile1
@@ -154,7 +158,7 @@
             this.checkfile1.AutoSize = true;
             this.checkfile1.Location = new System.Drawing.Point(2, 58);
             this.checkfile1.Name = "checkfile1";
-            this.checkfile1.Size = new System.Drawing.Size(18, 17);
+            this.checkfile1.Size = new System.Drawing.Size(15, 14);
             this.checkfile1.TabIndex = 27;
             this.checkfile1.UseVisualStyleBackColor = true;
             // 
@@ -164,7 +168,7 @@
             this.checkfile2.AutoSize = true;
             this.checkfile2.Location = new System.Drawing.Point(2, 96);
             this.checkfile2.Name = "checkfile2";
-            this.checkfile2.Size = new System.Drawing.Size(18, 17);
+            this.checkfile2.Size = new System.Drawing.Size(15, 14);
             this.checkfile2.TabIndex = 29;
             this.checkfile2.UseVisualStyleBackColor = true;
             // 
@@ -173,7 +177,7 @@
             this.cfilepath2.FormattingEnabled = true;
             this.cfilepath2.Location = new System.Drawing.Point(26, 90);
             this.cfilepath2.Name = "cfilepath2";
-            this.cfilepath2.Size = new System.Drawing.Size(413, 23);
+            this.cfilepath2.Size = new System.Drawing.Size(413, 20);
             this.cfilepath2.TabIndex = 28;
             // 
             // checkfile3
@@ -182,7 +186,7 @@
             this.checkfile3.AutoSize = true;
             this.checkfile3.Location = new System.Drawing.Point(2, 136);
             this.checkfile3.Name = "checkfile3";
-            this.checkfile3.Size = new System.Drawing.Size(18, 17);
+            this.checkfile3.Size = new System.Drawing.Size(15, 14);
             this.checkfile3.TabIndex = 31;
             this.checkfile3.UseVisualStyleBackColor = true;
             // 
@@ -191,7 +195,7 @@
             this.cfilepath3.FormattingEnabled = true;
             this.cfilepath3.Location = new System.Drawing.Point(26, 130);
             this.cfilepath3.Name = "cfilepath3";
-            this.cfilepath3.Size = new System.Drawing.Size(413, 23);
+            this.cfilepath3.Size = new System.Drawing.Size(413, 20);
             this.cfilepath3.TabIndex = 30;
             // 
             // download2
@@ -342,7 +346,7 @@
             this.initNameCombox.FormattingEnabled = true;
             this.initNameCombox.Location = new System.Drawing.Point(3, 412);
             this.initNameCombox.Name = "initNameCombox";
-            this.initNameCombox.Size = new System.Drawing.Size(121, 23);
+            this.initNameCombox.Size = new System.Drawing.Size(121, 20);
             this.initNameCombox.TabIndex = 69;
             this.initNameCombox.SelectedIndexChanged += new System.EventHandler(this.initNameCombox_SelectedIndexChanged);
             // 
@@ -381,7 +385,7 @@
             this.label11.AutoSize = true;
             this.label11.Location = new System.Drawing.Point(163, 17);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(37, 15);
+            this.label11.Size = new System.Drawing.Size(29, 12);
             this.label11.TabIndex = 4;
             this.label11.Text = "地址";
             // 
@@ -390,7 +394,7 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(19, 17);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(37, 15);
+            this.label10.Size = new System.Drawing.Size(29, 12);
             this.label10.TabIndex = 3;
             this.label10.Text = "选中";
             // 
@@ -399,7 +403,7 @@
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(436, 17);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(37, 15);
+            this.label9.Size = new System.Drawing.Size(29, 12);
             this.label9.TabIndex = 2;
             this.label9.Text = "说明";
             // 
@@ -408,7 +412,7 @@
             this.label8.AutoSize = true;
             this.label8.Location = new System.Drawing.Point(259, 17);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(52, 15);
+            this.label8.Size = new System.Drawing.Size(41, 12);
             this.label8.TabIndex = 1;
             this.label8.Text = "字符串";
             // 
@@ -417,7 +421,7 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(85, 17);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(31, 15);
+            this.label7.Size = new System.Drawing.Size(23, 12);
             this.label7.TabIndex = 0;
             this.label7.Text = "hex";
             // 
@@ -425,7 +429,7 @@
             // 
             this.textBox1.Location = new System.Drawing.Point(3, 469);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(500, 25);
+            this.textBox1.Size = new System.Drawing.Size(500, 21);
             this.textBox1.TabIndex = 60;
             // 
             // button1
@@ -442,7 +446,7 @@
             // 
             this.textBox2.Location = new System.Drawing.Point(3, 501);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(499, 25);
+            this.textBox2.Size = new System.Drawing.Size(499, 21);
             this.textBox2.TabIndex = 62;
             // 
             // label12
@@ -450,15 +454,55 @@
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(526, 504);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(67, 15);
+            this.label12.Size = new System.Drawing.Size(53, 12);
             this.label12.TabIndex = 63;
             this.label12.Text = "校验结果";
+            // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(1037, 12);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(262, 442);
+            this.richTextBox1.TabIndex = 64;
+            this.richTextBox1.Text = "";
+            // 
+            // textBox3
+            // 
+            this.textBox3.Location = new System.Drawing.Point(1042, 463);
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(100, 21);
+            this.textBox3.TabIndex = 65;
+            this.textBox3.Text = "0";
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(1149, 460);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 66;
+            this.button3.Text = "button3";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(1147, 494);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 67;
+            this.button4.Text = "button4";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // Form1
             // 
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ClientSize = new System.Drawing.Size(1039, 532);
+            this.ClientSize = new System.Drawing.Size(1311, 532);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.button1);
@@ -542,6 +586,10 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button4;
     }
 }
 
