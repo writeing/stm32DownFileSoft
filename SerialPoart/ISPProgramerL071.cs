@@ -58,23 +58,6 @@ namespace Serial_second
         private ISPProgramer isp_71 = new ISPProgramer();
         DStringExtend StringExtend = new DStringExtend();//串口数据处理
 
-        /// <summary>
-        /// 下载文件选择
-        /// </summary>
-        private CheckBox _check_file1 = null;
-        private CheckBox _check_file2 = null;
-        private CheckBox _check_file3 = null;
-
-        /// <summary>
-        /// 文件路径
-        /// </summary>
-        private ComboBox _file_path1 = null;
-        private ComboBox _file_path2 = null;
-        private ComboBox _file_path3 = null;
-
-        private List<BackgroundWorker> _work = null;
-
-        private initListinfo initList;
 
         public enum InitialType
         {
@@ -98,6 +81,7 @@ namespace Serial_second
             F103_MEDIUM_DENSITY = 0x10,
             F103_HIGH_DENSITY = 0x14,
             F103_XL_DENSITY = 0x30,
+            L431_XL_DENSITY = 0x35,
             F103_CONNECTIVITY_DENSITY = 0x18,
             F030XC_DENSITY = 0x42,
             L07X_DENSITY = 0x47,
@@ -113,48 +97,30 @@ namespace Serial_second
         public string PortName { get { return this.port2.PortName; } }
         public int PortBaudRate { get { return this.port2.BaudRate; } }
        
-        public System.IO.Ports.SerialPort port2 = null;//烧写串口号
-        public System.IO.Ports.SerialPort port1 = null; //打印串口号
-        private ComboBox _ComNum_cmb2 = null;   //烧写串口号
-        private ComboBox _ComNum_cmb1 = null;   //打印串口号
-        private ComboBox _cbproperty = null;   //串口DTR、RTS选择
+        public SerialPort port2 = null;//烧写串口号
+        //public SerialPort port1 = null; //打印串口号
+
         public event ProgressChangedEventHandler ProgressChanged = null;
         private bool cancelPending = false;
-
-        private TextBox _TextBox = null;
+        private TextBox _TextBox;
         private RichTextBox _richBox = null;
+        private string portName;
         ISPProgramerL071 _isp;
         public DataGridView customDataGridView;
 
-        public ISPProgramerL071() { }
-
-        public void UseISPProgramerL071(ISPProgramerL071 sp, List<BackgroundWorker> work, initListinfo initLists, SerialPort srt1, SerialPort srt2, ComboBox ComNum1, ComboBox property,TextBox SerialText, CheckBox Checkfile1, CheckBox Checkfile2, CheckBox Checkfile3,
-            ComboBox Filepath1, ComboBox Filepath2, ComboBox Filepath3,RichTextBox rtb = null)
+        public ISPProgramerL071()
         {
-            _isp = sp;
+        }
 
-            _work = work;
-
+        public void UseISPProgramerL071( SerialPort srt2, string _portName,  TextBox SerialText)
+        {
             //串口
-            port1 = srt1;
             port2 = srt2;
-            _ComNum_cmb2 = ComNum1;
-            _ComNum_cmb1 = ComNum1; 
-            _cbproperty = property; ///烧写串口属性
+            //_cbproperty = property; ///烧写串口属性
 
-            this.initList = initLists;
+            this.portName = _portName;
 
             _TextBox = SerialText;
-
-            _check_file1 = Checkfile1;
-            _check_file2 = Checkfile2;
-            _check_file3 = Checkfile3;
-
-            _file_path1 = Filepath1;
-            _file_path2 = Filepath2;
-            _file_path3 = Filepath3;
-
-            _richBox = rtb;
         }
         public void _showMessRich(string str)
         {
@@ -272,7 +238,7 @@ namespace Serial_second
                {
                     port2.Write(new byte[] { INIT_COMMAND }, 0, 1); ///进bootloader
 
-                   Thread.Sleep(50);
+                   Thread.Sleep(200);
                     try
                    {                                    
                        byte reply = 0;
@@ -447,6 +413,10 @@ namespace Serial_second
             DensityType pid = (DensityType)this.GetPID(); ;
             switch (pid)
             {
+                
+                case DensityType.L431_XL_DENSITY:
+                    this.PageSize = 2048;
+                    break;
                 case DensityType.F103_LOW_DENSITY:
                 case DensityType.F103_MEDIUM_DENSITY:
                     this.PageSize = 1024;
@@ -616,6 +586,69 @@ namespace Serial_second
             }
             return data;
         }
+        private string readDataforAddress(UInt32 address, int len,bool mode = false)
+        {
+
+            byte[] byteArray = this.ReadFlash(address, (UInt32)len);
+            string str;
+            if (mode)
+            {
+                str = BitConverter.ToInt32(byteArray,0).ToString();
+            }
+            else
+            {
+                str = Encoding.Default.GetString(byteArray);
+
+            }
+            return str;
+        }
+        public List<string> readDeviceinfo()
+        {
+            List<string> listDevice = new List<string>();
+            //device id
+            UInt32 address = 0x801ffc0;
+            int Length = 20;
+            listDevice.Add(readDataforAddress(address, Length));
+            //stream
+            address = 0x801ffe0;
+            Length = 20;
+            listDevice.Add(readDataforAddress(address, Length));
+            //port
+            address = 0x801ffb0;
+            Length = 8;
+            listDevice.Add(readDataforAddress(address, Length));
+            //ip
+            address = 0x801ff90;
+            Length = 32;
+            listDevice.Add(readDataforAddress(address, Length));
+            //delay
+            address = 0x801D000;
+            Length = 4;
+            listDevice.Add(readDataforAddress(address, Length,true));
+            //ccid
+            address = 0x801D020;
+            Length = 20;
+            listDevice.Add(readDataforAddress(address, Length));
+            //gsn
+            address = 0x801D040;
+            Length = 20;
+            listDevice.Add(readDataforAddress(address, Length));
+
+            return listDevice;
+        }
+
+        /// <summary>
+        /// check write data is ok
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool checkWriteData(UInt32 address, byte[] data)
+        {
+            byte[] d = this.ReadFlash(address, (UInt32)data.Length);
+            bool ret = (d != null && BitConverter.ToString(d).Equals(BitConverter.ToString(data)));
+            return ret;
+        }
 
         /// <summary>在指定flash地址写入数据，仅覆盖写入地址范围内的数据</summary>
         /// <param name="address">写入起始地址，应为4的倍数且不小于FLASH_BASE_ADDR但小于FLASH_BASE_ADDR+ChipSize</param>
@@ -628,8 +661,6 @@ namespace Serial_second
             {
                 throw new ArgumentOutOfRangeException("地址或数据长度非法\r\n");
             }
-
-            _TextBox.AppendText("length = " + length + "\r\n");
             if (length % 4 != 0)
             {
                 List<byte> temp = new List<byte>();
@@ -663,20 +694,30 @@ namespace Serial_second
                 {
                     //_TextBox.AppendText("开始烧写" + length + "\r\n");
                     UInt32 inPageAddr = address - FLASH_BASE_ADDR + offset;
-                    byte len = length > PageSize ? (byte)(0x7F) : (byte)(length - 1);
+                    byte len = length > 0x7F ? (byte)(0x7F) : (byte)(length - 1);
                     byte[] wData = new byte[len + 1];
                     Array.Copy(data, offset, wData, 0, len + 1);
-
-                    if (!this.Write((address + offset).ToAddressArray(), wData)) ///0x8000000+offset
+                    //check write is ok
+                    int reCount = 0;
+                    while(reCount < 5)
                     {
-                        _showMessRich((address + offset).ToString("X"));
-                        Reset_Serial_Port();
                         if (!this.Write((address + offset).ToAddressArray(), wData))
                         {
                             _TextBox.AppendText("写入false\r\n");
                             return false;
-                        }                                                
+                        }
+                        if(checkWriteData(address + offset, wData) == true)
+                        {
+                            break;
+                        }
+                        reCount++;
+                        _TextBox.AppendText("check flash :" + (address + offset).ToString("X") + "index:" + reCount.ToString());
+                        if (reCount == 5)
+                        {
+                            return false;
+                        }
                     }
+
                     offset += (UInt32)(1 + len);
                     length -= (UInt32)(1 + len);
 
@@ -687,8 +728,7 @@ namespace Serial_second
             }           
             else//写入的是自定义数据，自定义数据不能大于1页大小
             {
-                //this.ReportProgress(0, "开始写入自定义数据\r\n");
-                _TextBox.AppendText("开始写入自定义数据\r\n");
+                //this.ReportProgress(0, "开始写入自定义数据\r\n");              
                 //this.ReportProgress(100, "暂时不支持\r\n");
                 if (startPage != talePage)//数据跨页
                 {
@@ -696,7 +736,13 @@ namespace Serial_second
                     return false;
                 }
                 UInt32 add = FLASH_BASE_ADDR + page * PageSize;         //读一页
-                byte[] FlashData = this.Read(add.ToAddressArray(), 0x7F);
+                byte[] FlashData = new byte[PageSize];
+                for (int wxc = 0; wxc < PageSize; wxc += 0x80)
+                {
+                    UInt32 _tempAdd = add +(uint)wxc;
+                    byte[] _FlashData = this.Read(_tempAdd.ToAddressArray(), 0x7F);
+                    Array.Copy(_FlashData, 0, FlashData, wxc, 0x80);
+                }
                 //修改数据
                 for (int i = 0; i < PageSize; i++)
                 {
@@ -713,7 +759,7 @@ namespace Serial_second
                     List<ushort> pagesToErase16 = new List<ushort>();
                     pagesToErase16.Add(page);
                     //this.ReportProgress(0, "擦除flash\r\n");
-                    _TextBox.AppendText("擦除flash\r\n");
+                    //_TextBox.AppendText("擦除flash\r\n");
                     if (!this.ExternErase(pagesToErase16.ToArray()))    //擦除所有页
                     {
                         //this.ReportProgress(0, "flash擦除失败\r\n");
@@ -721,9 +767,21 @@ namespace Serial_second
                         return false;
                     }
                 }
-                if (!this.Write(add.ToAddressArray(), FlashData))
-                {
-                    return false;
+                UInt32 _addr = 0;
+                while (true)
+                {                    
+                    byte[] _FlashData = new byte[0x80];
+                    Array.Copy(FlashData, _addr, _FlashData, 0, 0x80);
+                    add += _addr;
+                    if (!this.Write(add.ToAddressArray(), _FlashData))
+                    {
+                        return false;
+                    }
+                    _addr += 0x80;
+                    if(_addr >= FlashData.Length)
+                    {
+                        break;
+                    }
                 }
                 //this.ReportProgress(100, "写入完成\r\n");
                 _TextBox.AppendText("写入完成\r\n");
@@ -738,12 +796,12 @@ namespace Serial_second
         /// </summary>
         public void Reset_Serial_Port()
         {
-                if (port1.IsOpen)
-                    port1.Close();
-                //_ComNum_cmb1.Text = "打开串口";
-         
-            var initType = (ISPProgramerL071.InitialType)this._cbproperty.SelectedIndex;
-            string portName = this._ComNum_cmb2.SelectedItem as string;
+                if (port2.IsOpen)
+                    port2.Close();
+            //_ComNum_cmb1.Text = "打开串口";
+            int index = 3;
+            var initType = (ISPProgramerL071.InitialType)index;
+            string portName = this.portName;
             this._TextBox.AppendText("串口: " + portName + "\r\n");
 
             bool IspInitState = this.Init(portName, 115200, initType);
@@ -1076,7 +1134,7 @@ namespace Serial_second
                     byte[] wData = new byte[data.Length + 1];
                     wData[0] = (byte)(data.Length - 1);
                     Array.Copy(data, 0, wData, 1, data.Length);
-                    return this.SendCommands(wData, TIMEOUT_10MS);
+                    return this.SendCommands(wData, TIMEOUT_200MS);
                 }
             }
             return false;
@@ -1264,12 +1322,12 @@ namespace Serial_second
             try
             {
                  byte a = (byte)this.port2.ReadByte();
-                 _TextBox.Text += "ReadOutProtect: " + " a: 0x" + a.ToString("X2") + "\r\n";
+                 //_TextBox.Text += "ReadOutProtect: " + " a: 0x" + a.ToString("X2") + "\r\n";
                  return (a == ACK_REPLY);
              }
              catch (Exception)
             {
-                _TextBox.Text += "RReadOutProtecterror: " + "\r\n";
+                //_TextBox.Text += "RReadOutProtecterror: " + "\r\n";
                  return false;
              }
    
@@ -1330,85 +1388,97 @@ namespace Serial_second
             }
         }
         #endregion
-
+        struct downFileInfo
+        {
+            public string dataName;
+            public string address;
+            public bool dataType; //false string  true hex
+            public string strData;
+            public int hexData;
+            public void initStu(string name,string add, string str, int hex = 0, bool type = false)
+            {
+                dataName = name;
+                address = add;
+                dataType = type;
+                strData = str;
+                hexData = hex;
+            }
+        }
         #region 烧录功能
-
-        public List<FirmwareInfomation> GetDataToWrite(ref DeviceOperation result)
+        public List<FirmwareInfomation> GetDataToWrite(ref DeviceOperation result,string deviceID,int delayOut)
         {
             List<FirmwareInfomation> firmwares = new List<FirmwareInfomation>();
+            List<string> listDownFileName = new List<string>();
+            string appFileName = "Bootloader.hex";
+            string bootFileName = "Proqxz.hex";
+            listDownFileName.Add(appFileName);
+            listDownFileName.Add(bootFileName);
+            //string[] downfileName = new string
+            foreach (string file in listDownFileName)
+            {
+                FirmwareInfomation firmware = this.ReadFile(file); ///读取烧写文件
+                if (firmware.Error != null)
+                {
+                    _TextBox.AppendText(firmware.Error.Message + "\r\n");
+                    return null;
+                }
+                firmware.Name = file;
+                result.File1 = file;
+                firmwares.Add(firmware);
+            }
+            List<downFileInfo> listDown = new List<downFileInfo>();
+            downFileInfo temp = new downFileInfo();
+            temp.initStu("设备号","801ffc0", deviceID);
+            listDown.Add(temp);
 
-            if (this._check_file1.Checked)
-            {
-                FirmwareInfomation firmware = this.ReadFile(this._file_path1.Text); ///读取烧写文件
-                if (firmware.Error != null)
-                {
-                    _TextBox.AppendText(firmware.Error.Message + "\r\n");
-                    return null;
-                }
-                result.File1 = this._file_path1.Text;
-                firmwares.Add(firmware);
-            }
-            if (this._check_file2.Checked)
-            {
-                FirmwareInfomation firmware = this.ReadFile(this._file_path2.Text);
-                if (firmware.Error != null)
-                {
-                    _TextBox.AppendText(firmware.Error.Message + "\r\n");
-                    return null;
-                }
-                result.File2 = this._file_path2.Text;
-                firmwares.Add(firmware);
-            }
-            if (this._check_file3.Checked)
-            {
-                FirmwareInfomation firmware = this.ReadFile(this._file_path3.Text);
-                if (firmware.Error != null)
-                {
-                    _TextBox.AppendText(firmware.Error.Message + "\r\n");
-                    return null;
-                }
-                result.File3 = this._file_path3.Text;
-                firmwares.Add(firmware);
-            }
+            temp = new downFileInfo();
+            temp.initStu("数据流","801ffe0", "ws01");
+            listDown.Add(temp);
+
+            temp = new downFileInfo();
+            temp.initStu("端口","801ffb0", "9000");
+            listDown.Add(temp);
+
+            temp = new downFileInfo();
+            temp.initStu("域名","801ff90", "device.nongbotech.com");
+            listDown.Add(temp);
+
+            temp = new downFileInfo();
+            temp.initStu("延时时间","801D000", null, delayOut, true);
+            listDown.Add(temp);
 
             //写入自定义数据
-            for (int i = 0; i < initList.select.Count - 1; i++)
+           foreach(downFileInfo dfi in listDown)
             {
-                    //if (dt.Rows[i].Cells[0].Value.Equals(true))
-                if (initList.select[i] == true)
+                UInt32 addr;
+                if (!UInt32.TryParse(dfi.address, System.Globalization.NumberStyles.HexNumber, null, out addr)
+                    || addr <= ISPProgramer.FLASH_BASE_ADDR || addr % 4 != 0)
                 {
-                    UInt32 addr;
-                    if (!UInt32.TryParse(initList.address[i], System.Globalization.NumberStyles.HexNumber, null, out addr)
-                        || addr <= ISPProgramer.FLASH_BASE_ADDR || addr % 4 != 0)
+                    _TextBox.AppendText("自定义数据" + dfi.address + "非法\r\n");
+                    return null;
+                }
+                FirmwareInfomation customRow = new FirmwareInfomation();
+                customRow.BaseAddress = addr;
+
+                if (dfi.dataType == true) ///选择HEX格式
+                {
+                    try
                     {
-                        _TextBox.AppendText("自定义数据" + (i + 1) + "行地址" + initList.address[i] + "非法\r\n");
+                        customRow.Data = BitConverter.GetBytes(dfi.hexData);
+                    }
+                    catch (Exception)
+                    {
+                        _TextBox.AppendText("16进制数据格式错误");
                         return null;
                     }
-                    FirmwareInfomation customRow = new FirmwareInfomation();
-                    customRow.BaseAddress = addr;
-
-                    if (initList.hex[i].Equals(true)) ///选择HEX格式
-                    {
-                        try
-                        {
-                            customRow.Data = initList.data[i].ToByteArray();
-                        }
-                        catch (Exception)
-                        {
-                            _TextBox.AppendText("16进制数据格式错误");
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        customRow.Data = Encoding.ASCII.GetBytes(initList.data[i] + "\0");
-                    }
-                    if (initList.info[i] != null)
-                        customRow.Name = initList.info[i];
-                    else
-                        customRow.Name = "";
-                    firmwares.Add(customRow);
                 }
+                else
+                {
+                    customRow.Data = Encoding.ASCII.GetBytes(dfi.strData + "\0");
+                }
+                customRow.Name = dfi.dataName;
+                firmwares.Add(customRow);
+
             }
 
             return firmwares;
@@ -1444,74 +1514,47 @@ namespace Serial_second
             return result;
         }
 
-        public BackgroundWorker WriteData(List<FirmwareInfomation> list, Action<bool> NextAction,ref bool status)
+        public BackgroundWorker WriteData(List<FirmwareInfomation> list,ref bool status,bool isErase)
         {
             BackgroundWorker writeWork = new BackgroundWorker();
             writeWork.WorkerReportsProgress = true;
             writeWork.WorkerSupportsCancellation = true;
             writeWork.ProgressChanged += WriteWork_ProgressChanged; ///添加烧写进度条
             bool ret = true;
-                {
-                    {
-                    if(ExternErase(0xFF) == true)
-                    {
-                        _TextBox.AppendText("擦除成功");
-                    }
-                    else
-                    {
-                        _TextBox.AppendText("擦除失败1");
-                        _showMessRich("擦除失败1");
 
-                        if (erase_allFash() == true)
-                        {
-                            _TextBox.AppendText("擦除成功");
-                        }
-                        else
-                        {
-                            _TextBox.AppendText("擦除失败2");
-                            _showMessRich("擦除失败2");
-                            return null;
-                        }
-                    }                    
-                    foreach (FirmwareInfomation item in list)
-                        {
-                            _TextBox.AppendText("读取文件地址 = "+ item.BaseAddress.ToString("X")  + "\r\n");
-                            ret = this.WriteFlash(item.BaseAddress, item.Data);
-                            if (!ret)
-                            {
-                                //worker.ReportProgress(0, "写入出错\r\n");
-                                _TextBox.AppendText("写入出错\r\n");
-                                _showMessRich("写入出错");
-                            break;
-                            }
-                            else
-                            {
-                            //worker.ReportProgress(0, "开始校验\r\n");
-                               _TextBox.AppendText("开始校验\r\n");
-                               byte[] d = this._isp.ReadFlash(item.BaseAddress, (UInt32)item.Data.Length);
-                               if(d == null)
-                               {
-                                 _showMessRich("读取失败");
-                               }
-                               ret = (d != null && BitConverter.ToString(d).Equals(BitConverter.ToString(item.Data)));
-                                if (!ret)
-                                {
-                                    _TextBox.AppendText("数据校验失败\r\n");
-                                    _showMessRich("数据校验失败");
-                                    break;
-                                }
-                                else
-                                {
-                                //worker.ReportProgress(0, Convert.ToString(item.BaseAddress, 16) + "写入" + item.Data.Length + "字节并校验成功\r\n");
-                                    _TextBox.AppendText(Convert.ToString(item.BaseAddress, 16) + "写入" + item.Data.Length + "字节并校验成功\r\n");
-                                    status = true;
-                                }
-                            }
-                        }
-                        this._isp.Close();                    
-                    //e.Result = ret;
+            if (isErase)
+            {
+                if (erase_allFash() == true)
+                {
+                    _TextBox.AppendText("擦除成功");
                 }
+                else
+                {
+                    _TextBox.AppendText("擦除失败2");
+                    _showMessRich("擦除失败2");
+                    return null;
                 }
+            }                    
+            foreach (FirmwareInfomation item in list)
+            {
+                _TextBox.AppendText("读取文件:"+ item.Name + "\r\n");
+                ret = this.WriteFlash(item.BaseAddress, item.Data);
+                if (!ret)
+                {
+                    //worker.ReportProgress(0, "写入出错\r\n");
+                    _TextBox.AppendText("写入出错\r\n");
+                    break;
+                }
+                else
+                {                  
+                    {                        
+                        _TextBox.AppendText(DateTime.Now.ToString("hh:mm:ss") + " 写入成功\r\n");
+                        status = true;
+                    }
+                }
+            }
+            this.Close();                    
+            //e.Result = ret;
             return writeWork;
         }
 
